@@ -27,7 +27,8 @@ def parse_ann(datapath, labels_to_ignore = [], with_notes=False):
     -------
     df: pandas DataFrame 
         It has information from ann files. Columns: 'annotator', 'bunch',
-        'filename', 'mark', 'label', 'offset1', 'offset2', 'span', 'code'
+        'filename', 'mark', 'label', 'offset1', 'offset2', 'span', 'code', 
+        'offset'
     '''
     start = time.time()
     info = []
@@ -50,6 +51,8 @@ def parse_ann(datapath, labels_to_ignore = [], with_notes=False):
                                      'label','offset1','offset2','span'])
     end = time.time()
     print("Elapsed time: " + str(round(end-start, 2)) + 's')
+    
+    df['offset'] = df[['offset1', 'offset2']].agg(' '.join, axis=1)
     
     return df
 

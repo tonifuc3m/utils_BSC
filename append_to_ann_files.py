@@ -15,6 +15,9 @@ def modify_files(new_annots, out_path, with_notes=False, is_sug=True):
     new_annots: python dict 
         It has new annotations and the file they belong to. 
         {filename: [annotation1, annotatio2, ]}
+    new_annots: pandas DataFrame
+        It has the new annotations and the file they belong to. 
+        Required column names: ['filename', 'offset', 'label', 'span']
     out_path: str
         Path to files.
     with_notes: bool
@@ -22,22 +25,21 @@ def modify_files(new_annots, out_path, with_notes=False, is_sug=True):
     is_sug: bool
         Flag. Whether new annotations should appear as suggestions or not
     '''
-    files_new_annot = list(new_annots.keys())
+    files_new_annot = set(new_annots.filename.to_list())
     
     for root, dirs, files in os.walk(out_path):
         for filename in files:
             if filename not in files_new_annot:
                 continue
-            if filename[-3:] != 'txt':
+            if filename[-3:] != 'ann':
                 continue
-            filename_ann = filename[0:-3]+ 'ann'
             
             # Get highest mark in ANN
-            if os.path.exists(os.path.join(root, filename_ann)) == 0:
+            if os.path.exists(os.path.join(root, filename)) == 0:
                 mark = 0
                 mode = "w"
             else:
-                file_hm = open(os.path.join(root,filename_ann),"r")
+                file_hm = open(os.path.join(root,filename),"r")
                 lines = file_hm.readlines()
                 if lines:
                     # Get marks
@@ -52,17 +54,17 @@ def modify_files(new_annots, out_path, with_notes=False, is_sug=True):
                 mode = "a"
            
             # 2. Write new annotations
-            new_annotations = new_annots[filename]
-            file = open(os.path.join(root,filename_ann),mode)
-            for a in new_annotations:
+            new_annotations = new_annots.loc[new_annots['filename'] == filename,:]
+            file = open(os.path.join(root,filename),mode)
+            for idx, a in new_annotations.iterrows():
                 mark = mark + 1
                 if is_sug == True:
-                    label = '_SUG_' +  a[3]
+                    label = '_SUG_' +  a['label']
                 else:
-                    label = a[3]
-                file.write('T' + str(mark) + '\t' + label + ' ' + str(a[1]) +
-                           ' ' + str(a[2]) + '\t' + a[0] + '\n') 
+                    label = a['label']
+                file.write('T' + str(mark) + '\t' + label + ' ' + a['offset'] +
+                           '\t' + a['span'] + '\n') 
                 if with_notes == False:
                     continue
                 file.write('#' + str(mark) + '\t' + 'AnnotatorNotes T' +
-                           str(mark) + '\t' + a[4] + '\n')    
+                           str(mark) + '\t' + a['code'] + '\n')    
