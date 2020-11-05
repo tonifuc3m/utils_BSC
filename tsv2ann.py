@@ -34,12 +34,12 @@ def tsv2ann(df, out_path, with_notes = False):
     if not os.path.exists(out_path):
         os.mkdir(out_path) 
         
-    ccs = set(df['filename'].to_list())
+    files = set(df['filename'].to_list())
     
-    for cc in ccs:
-        df_this = df[df['filename'] == cc]
+    for _file in files:
+        df_this = df[df['filename'] == _file]
         mark = 0
-        f = open(os.path.join(out_path, cc + '.ann'), 'w')
+        f = open(os.path.join(out_path, _file), 'w')
         
         for index, row in df_this.iterrows():
             mark = mark + 1
