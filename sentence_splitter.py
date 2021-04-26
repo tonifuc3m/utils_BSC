@@ -42,6 +42,6 @@ if __name__ == '__main__':
         if f[-3:]!='txt':
             continue
         txt = open(os.path.join(path, f)).read() 
-        ntokens = nsent + len(split_to_sentences(txt))
+        nsent = nsent + len(split_to_sentences(txt))
     print('Files in {} have {} sent'.format(path, nsent))
 
